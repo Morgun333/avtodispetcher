@@ -2,6 +2,7 @@ import io.qameta.allure.Allure;
 import net.jodah.failsafe.internal.util.Assert;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.AllureUtils;
@@ -9,11 +10,13 @@ import utils.WebDriverSingleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.Duration;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.openqa.selenium.Keys.ENTER;
 
 @DisplayName("Домашнее задание на позицию QA Automation в Smartech")
 public class MainTest {
     WebDriverWait wait = new WebDriverWait(WebDriverSingleton.getDriver(), Duration.ofSeconds(5));
+    Actions actions = new Actions(WebDriverSingleton.getDriver());
     @BeforeEach
     public void setUp() {
 
@@ -34,14 +37,14 @@ public class MainTest {
             AllureUtils.screenshotAfterStep();
         });
 
-            Allure.step("Вводит в поисковую строку фразу «расчет расстояний между городами» и запускает поиск", () -> {
-                AllureUtils.screenshotBeforeStep();
+        Allure.step("Вводит в поисковую строку фразу «расчет расстояний между городами» и запускает поиск", () -> {
+            AllureUtils.screenshotBeforeStep();
 
-                WebDriverSingleton.getDriver().findElement(By.id("text"))
-                        .sendKeys("расчет расстояний между городами", ENTER);
+            WebDriverSingleton.getDriver().findElement(By.id("text"))
+                    .sendKeys("расчет расстояний между городами", ENTER);
 
-                AllureUtils.screenshotAfterStep();
-            });
+            AllureUtils.screenshotAfterStep();
+        });
 
         Allure.step("Среди результатов поиска пользователь ищет результат с сайта «avtodispetcher.ru» (в течение 5 секунд)", () -> {
             AllureUtils.screenshotBeforeStep();
@@ -82,21 +85,23 @@ public class MainTest {
 
             AllureUtils.screenshotBeforeStep();
 
+            actions.moveToElement(WebDriverSingleton.getDriver().findElement(By.cssSelector("input[name='from']")));
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[name='from']")))
                     .sendKeys("Тула");
 
+            actions.moveToElement(WebDriverSingleton.getDriver().findElement(By.cssSelector("input[name='to']")));
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[name='to']")))
                     .sendKeys("Санкт-Петербург");
 
+            actions.moveToElement(WebDriverSingleton.getDriver().findElement(By.cssSelector("input[name='fc']")));
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[name='fc']")))
                     .clear();
-
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[name='fc']")))
                     .sendKeys("9");
 
+            actions.moveToElement(WebDriverSingleton.getDriver().findElement(By.cssSelector("input[name='fp']")));
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[name='fp']")))
                     .clear();
-
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[name='fp']")))
                     .sendKeys("46");
 
@@ -106,7 +111,18 @@ public class MainTest {
         Allure.step("Пользователь нажимает кнопку «Рассчитать» ", () -> {
             AllureUtils.screenshotBeforeStep();
 
-            WebDriverSingleton.getDriver().findElement(By.cssSelector("input[value='Рассчитать']")).click();
+            try {
+                if (WebDriverSingleton.getDriver().findElement(By.cssSelector("span[class='ezmob-footer-close']")).isDisplayed()) {
+                    WebDriverSingleton.getDriver().findElement(By.cssSelector("span[class='ezmob-footer-close']")).click();
+                }
+                if (WebDriverSingleton.getDriver().findElement(By.cssSelector("a[aria-label='dismiss cookie message']")).isDisplayed()) {
+                    WebDriverSingleton.getDriver().findElement(By.cssSelector("a[aria-label='dismiss cookie message']")).click();
+                }
+            } catch (Exception e){
+
+            }
+            actions.moveToElement(WebDriverSingleton.getDriver().findElement(By.cssSelector("input[value='Рассчитать']")));
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[value='Рассчитать']"))).click();
 
             AllureUtils.screenshotAfterStep();
         });
@@ -114,10 +130,22 @@ public class MainTest {
         Allure.step("Пользователь проверяет что рассчитанное расстояние = 897 км, а стоимость топлива = 3726 руб.", () -> {
             AllureUtils.screenshotBeforeStep();
 
+
+            try {
+                if(WebDriverSingleton.getDriver().findElement(By.cssSelector("span[class='ezmob-footer-close']")).isDisplayed()){
+                    WebDriverSingleton.getDriver().findElement(By.cssSelector("span[class='ezmob-footer-close']")).click();
+                }
+                if (WebDriverSingleton.getDriver().findElement(By.cssSelector("a[aria-label='dismiss cookie message']")).isDisplayed()) {
+                    WebDriverSingleton.getDriver().findElement(By.cssSelector("a[aria-label='dismiss cookie message']")).click();
+                }
+            } catch (Exception e){
+
+            }
             String totalDistance = WebDriverSingleton.getDriver().findElement(By.cssSelector("span[id='totalDistance']")).getText();
             assertEquals(totalDistance, "897");
 
-            String fuelPrice = WebDriverSingleton.getDriver().findElement(By.cssSelector("div[class='fuel_calculator fuelCalculator'")).getText();
+            String fuelPrice = WebDriverSingleton.getDriver().findElement(By.cssSelector("form[onsubmit='return fuelFormSubmitHandler(this);']")).getText();
+            assertTrue(fuelPrice.contains("Стоимость топлива: 81 л. * руб./л. = 3726 руб."));
 
             AllureUtils.screenshotAfterStep();
         });
@@ -147,19 +175,31 @@ public class MainTest {
             WebElement elm = WebDriverSingleton.getDriver().findElement(By.cssSelector("div[class='submit_button']"));
             ((JavascriptExecutor)WebDriverSingleton.getDriver()).executeScript("arguments[0].scrollIntoView(true);",elm);
             elm.click();
-            Thread.sleep(10000);
 
             AllureUtils.screenshotAfterStep();
         });
 
-        Allure.step("Пользователь снова нажимает «Рассчитать", () -> {
+        Allure.step("Пользователь проверяет что расстояние теперь = 966 км, а стоимость топлива = 4002руб.", () -> {
             AllureUtils.screenshotBeforeStep();
 
-            WebElement elm = WebDriverSingleton.getDriver().findElement(By.cssSelector("span[id='totalDistance']"));
-            ((JavascriptExecutor)WebDriverSingleton.getDriver()).executeScript("arguments[0].scrollIntoView(true);",elm);
-            Thread.sleep(20000);
+
+            try {
+                if(WebDriverSingleton.getDriver().findElement(By.cssSelector("span[class='ezmob-footer-close']")).isDisplayed()){
+                    WebDriverSingleton.getDriver().findElement(By.cssSelector("span[class='ezmob-footer-close']")).click();
+                }
+                if (WebDriverSingleton.getDriver().findElement(By.cssSelector("a[aria-label='dismiss cookie message']")).isDisplayed()) {
+                    WebDriverSingleton.getDriver().findElement(By.cssSelector("a[aria-label='dismiss cookie message']")).click();
+                }
+            } catch (Exception e){
+
+            }
+            String totalDistance = WebDriverSingleton.getDriver().findElement(By.cssSelector("span[id='totalDistance']")).getText();
+            assertEquals(totalDistance, "966");
+
+            String fuelPrice = WebDriverSingleton.getDriver().findElement(By.cssSelector("form[onsubmit='return fuelFormSubmitHandler(this);']")).getText();
+            assertTrue(fuelPrice.contains("Стоимость топлива: 81 л. * руб./л. = 4002 руб."));
 
             AllureUtils.screenshotAfterStep();
         });
-        }
     }
+}

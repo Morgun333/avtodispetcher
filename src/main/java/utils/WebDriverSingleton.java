@@ -1,5 +1,6 @@
 package utils;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -16,6 +17,7 @@ public class WebDriverSingleton {
             ChromeOptions opt = new ChromeOptions();
             opt.setPageLoadStrategy(PageLoadStrategy.EAGER);
             driver = new ChromeDriver(opt);
+            driver.manage().window().maximize();
         }
         return driver;
     }

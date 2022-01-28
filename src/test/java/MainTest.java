@@ -197,7 +197,7 @@ public class MainTest {
             assertEquals(totalDistance, "966");
 
             String fuelPrice = WebDriverSingleton.getDriver().findElement(By.cssSelector("form[onsubmit='return fuelFormSubmitHandler(this);']")).getText();
-            assertTrue(fuelPrice.contains("Стоимость топлива: 81 л. * руб./л. = 4002 руб."));
+            assertTrue(fuelPrice.contains("Стоимость топлива: 87 л. * руб./л. = 4002 руб."));
 
             AllureUtils.screenshotAfterStep();
         });

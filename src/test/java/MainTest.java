@@ -1,5 +1,4 @@
 import io.qameta.allure.Allure;
-import net.jodah.failsafe.internal.util.Assert;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -33,15 +32,16 @@ public class MainTest {
     public void checkYandex() {
 
         Allure.step("Пользователь заходит на сайт Яндекс: www.yandex.ru", () -> {
-            WebDriverSingleton.getDriver().get("https://www.yandex.ru");
+            WebDriverSingleton.getDriver().get("https://ya.ru/");
             AllureUtils.screenshotAfterStep();
         });
 
         Allure.step("Вводит в поисковую строку фразу «расчет расстояний между городами» и запускает поиск", () -> {
             AllureUtils.screenshotBeforeStep();
 
-            WebDriverSingleton.getDriver().findElement(By.id("text"))
-                    .sendKeys("расчет расстояний между городами", ENTER);
+            WebDriverSingleton.getDriver().findElement(By.cssSelector("input[name='text']"))
+                    .sendKeys("расчет расстояний между городами",ENTER);
+
 
             AllureUtils.screenshotAfterStep();
         });
